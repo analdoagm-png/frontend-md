@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Editor and local settings
+.idea/
+.vscode/
+*.swp
+
+# Logs and temporary files
+*.log
+tmp/
