@@ -1,15 +1,15 @@
 # FRONTEND.md
 
 **Owner:** Analdo — Senior Product Designer (agentic/AI-backed workflow)  
-**Purpose:** Define what “done” looks like when frontend work hands off to a backend team. Any AI agent should be able to use this file to identify the required artifacts, their canonical locations, and the decisions that need explicit agreement.
+**Purpose:** Audit the health of a repository’s frontend-to-backend integration. Any AI agent should be able to inspect the available evidence, identify risks and missing capabilities, recommend practical improvements, and give backend teams an actionable list of gaps the product designer cannot resolve alone.
 
-If you are an agent working in this repo, read **§6, Instructions for Agents**, before starting.
+If you are an agent working in this repo, read **§7, Instructions for Agents**, before starting.
 
 ---
 
 ## 1. Core Principle
 
-Storybook shows backend engineers *what* the UI must support. It does not define *how* to build the API. Treat it as the front door to a set of versioned integration artifacts—not a substitute for them.
+Storybook shows backend engineers *what* the UI must support. It does not define *how* to build the API. Treat it as one source of audit evidence alongside runtime code, contracts, tests, fixtures, and environment documentation—not a substitute for them.
 
 A backend engineer should be able to open a feature folder and determine:
 
@@ -20,9 +20,34 @@ A backend engineer should be able to open a feature folder and determine:
 
 ---
 
-## 2. Deliverables Checklist
+## 2. Audit Workflow
 
-For every feature that depends on a backend, review every item deliberately. Mark omitted items as `N/A` with a reason in the PR description or feature README.
+Audit the repository that is actually present. Do not award a passing result because an ideal artifact *could* exist, and do not guess behavior that is not evidenced in code, documentation, fixtures, or a verified running environment.
+
+1. **Set the scope.** Identify the product surfaces, feature folders, API clients, contracts, Storybook/MSW setup, tests, environment files, and relevant CI configuration. State what was unavailable or out of scope.
+2. **Trace real integrations.** For each meaningful user flow, map screen/component → client call → endpoint/operation → response model → UI state. Search for direct calls as well as shared clients, generated clients, GraphQL operations, and server-state libraries.
+3. **Assess the audit domains in §3.** Assign each domain one result: **Verified**, **Partial**, **Missing**, **Not applicable**, or **Not verifiable**. “Not verifiable” means the repository does not provide enough evidence; it is not a pass.
+4. **Validate behavior when feasible.** Run existing tests, type checks, Storybook, or documented local flows. Report commands that could not run and why. Never treat a passing mock-only state as proof that a real API matches it.
+5. **Publish an evidence-based report.** If repository writes are in scope, use `docs/frontend-backend-audits/YYYY-MM-DD.md`; otherwise return the same report in the audit response. Every finding should cite a file/path, command result, observed state, or explicitly state that the evidence is absent.
+
+### Finding format
+
+| Priority | Finding | Evidence | Product / delivery impact | Recommended next step | Owner | Verification |
+|---|---|---|---|---|---|---|
+| P1 | Project deletion has no documented error shape | `src/features/projects/api.ts`; no contract found | UI cannot reliably explain failures or rollback | Define the error envelope and add 403/500 fixtures | Backend + frontend | Contract test and Storybook states pass |
+
+- **P0** — security, data loss, privacy, or a release-blocking integration failure
+- **P1** — a material product state, contract, authorization, or reliability gap likely to break users or delivery
+- **P2** — an important maintainability, testability, accessibility, or observability weakness
+- **P3** — a low-risk improvement or documentation refinement
+
+Recommendations must be specific, testable, and assigned to **Product Design**, **Frontend**, **Backend**, or **Shared**. Do not label a finding “backend” without explaining the missing capability, its impact, and the decision or artifact needed.
+
+---
+
+## 3. Audit Domains and Expected Artifacts
+
+For every backend-dependent feature, assess every item deliberately. Record the audit result and evidence; mark omitted items as `N/A` with a reason in the report or feature README.
 
 - [ ] **API contract** (OpenAPI or concise endpoint document)
 - [ ] **Typed frontend API models** generated from, or validated against, that contract
@@ -41,7 +66,7 @@ Each backend-backed feature owns its integration documentation at `src/features/
 
 ---
 
-### 2.1 API Contract
+### 3.1 API Contract
 
 The API contract is the source of truth for request and response semantics. Store it in `contracts/` and link to it from the feature README.
 
@@ -70,13 +95,13 @@ type ApiError = {
 
 ---
 
-### 2.2 Typed Frontend API Models
+### 3.2 Typed Frontend API Models
 
 Store models and fetch logic with the feature, for example `src/features/projects/api.ts`. Types must be generated from, or explicitly aligned to, the approved contract. Keep UI-domain transformations separate from raw transport types where that improves readability.
 
 ---
 
-### 2.3 MSW Fixtures in Storybook
+### 3.3 MSW Fixtures in Storybook
 
 Every meaningful backend outcome gets a deterministic Storybook story and MSW handler. Minimum set per feature:
 
@@ -94,7 +119,7 @@ Fixtures should be realistic enough to serve as contract examples, but must not 
 
 ---
 
-### 2.4 Integration Map
+### 3.4 Integration Map
 
 Maintain this table in the feature README so no one has to reverse-engineer component-to-endpoint dependencies.
 
@@ -106,7 +131,7 @@ Maintain this table in the feature README so no one has to reverse-engineer comp
 
 ---
 
-### 2.5 Auth & Permissions Matrix
+### 3.5 Auth & Permissions Matrix
 
 Define what is hidden, disabled, or server-rejected for each role. Record it in the feature README.
 
@@ -122,7 +147,7 @@ Be explicit about **hidden**, **disabled**, and **rejected**. Also distinguish `
 
 ---
 
-### 2.6 Error, Retry, and Offline Conventions
+### 3.6 Error, Retry, and Offline Conventions
 
 - Define field-level versus form-level validation display.
 - Map stable backend error codes to user-facing copy; do not render backend messages directly unless explicitly reviewed as safe.
@@ -133,7 +158,7 @@ Be explicit about **hidden**, **disabled**, and **rejected**. Also distinguish `
 
 ---
 
-### 2.7 Event / Analytics Schema
+### 3.7 Event / Analytics Schema
 
 Analytics is separate from the API contract. State the destination and owner: client analytics SDK, server-side event pipeline, or both. Never send secrets or unnecessary PII; document consent and retention requirements when they apply.
 
@@ -144,7 +169,7 @@ Analytics is separate from the API contract. State the destination and owner: cl
 
 ---
 
-### 2.8 Accessibility and Observability Notes
+### 3.8 Accessibility and Observability Notes
 
 For each integration, document:
 
@@ -154,7 +179,7 @@ For each integration, document:
 
 ---
 
-### 2.9 Environment and Handoff Notes
+### 3.9 Environment and Handoff Notes
 
 - Required environment-variable names only—never values or secrets
 - API base URLs per environment (local/staging/production)
@@ -164,7 +189,7 @@ For each integration, document:
 
 ---
 
-### 2.10 Acceptance Checklist
+### 3.10 Acceptance Checklist
 
 Copy this block into the feature PR or README when connecting a real endpoint:
 
@@ -183,7 +208,23 @@ Copy this block into the feature PR or README when connecting a real endpoint:
 
 ---
 
-## 3. Recommended Repo Structure
+### 3.11 Backend Guidance Register
+
+When an audit finds a gap that Product Design or Frontend cannot resolve from the repository, add it to this register. Its purpose is to make backend teams aware of what is missing and give them enough context to either address it or guide the designer toward a workable solution.
+
+Use it for missing or undocumented endpoints, response semantics, authorization rules, error codes, rate limits, caching, server-owned analytics, staging access, and observability. Do **not** use it for a purely frontend implementation task that the repository already enables.
+
+| Area lacking | Evidence and impact | Backend action or decision needed | What the designer/frontend needs | Owner / status |
+|---|---|---|---|---|
+| Contract semantics | `Project.status` is rendered but its allowed values and null behavior are undocumented | Publish or confirm enum values, nullability, and a versioned contract | Approved labels and fallback behavior | Backend — open |
+| Authorization model | UI hides delete, but no source defines whether the server returns 403 or 404 | Confirm enforcement and resource-disclosure policy | Correct denied state and test fixtures | Backend + security — open |
+| Diagnostics | API errors expose no safe correlation ID | Return or document a request ID in error responses | Supportable error state and bug-report path | Backend — open |
+
+Phrase each item as a request that can be answered: **what is missing, why it matters, what decision or artifact is needed, and how the answer will be verified**. Backend may supply the capability, name the owner, document an existing behavior, or propose an alternative. Record that response and update the audit finding rather than leaving a permanent workaround.
+
+---
+
+## 4. Recommended Repo Structure
 
 ```text
 contracts/
@@ -212,36 +253,42 @@ Feature-owned mocks, fixtures, stories, models, and documentation should evolve 
 
 ---
 
-## 4. Why This Matters for a Senior Product Design Role
+## 5. Why This Matters for a Senior Product Design Role
 
 This is not documentation hygiene alone. These artifacts extend design work into frontend architecture, API semantics, accessibility, observability, and cross-functional delivery. A design system built this way documents **product states**—loading, empty, permission-denied, offline, and error—not merely visual components.
 
 ---
 
-## 5. Operating Rules
+## 6. Operating Rules
 
 - The API contract is authoritative for transport shapes; feature documentation is authoritative for UI behavior and product decisions.
 - A change to an endpoint, role gate, or analytics event updates its contract and feature documentation in the same PR.
 - Use `N/A — <reason>` rather than silently omitting a deliverable.
 - Treat a mismatch found in staging/production as a contract issue: record the observed behavior, request ID if safe, affected version, and decision to change frontend or backend.
+- An audit result must cite evidence. Absence of a contract, test, fixture, or documented behavior is a finding or `Not verifiable`, not an assumption that it exists.
+- Product Design should resolve UI and product-decision gaps it owns; move backend-owned unknowns to the Backend Guidance Register rather than inventing an API behavior.
 
 ---
 
-## 6. Instructions for Agents
+## 7. Instructions for Agents
 
-1. Before a feature starts, review its contract and `src/features/<feature>/README.md`; do not assume stories alone are sufficient.
-2. When adding an endpoint dependency, update the feature Integration Map and the API contract in the same PR.
-3. When adding a role/permission gate, update the feature Auth & Permissions Matrix and create the corresponding state coverage.
-4. Create MSW fixture coverage for populated, empty, loading, error, unauthenticated, and all applicable forbidden/not-found/offline states. Retain mocks after live integration.
-5. Never leave an invented backend response shape undocumented. Record the proposed shape in `contracts/` and flag it for confirmation.
-6. If omitting a §2 deliverable, add `N/A — <reason>` to the PR or feature README.
-7. Update this file and its changelog only when changing cross-feature policy, locations, or required deliverables; keep ordinary feature specifics in the feature README.
+1. Start with §2. Inventory the repository and state the audit scope and missing evidence before making conclusions.
+2. Trace each material user flow from UI to its backend dependency; do not assume Storybook stories alone represent runtime behavior.
+3. Assess every §3 domain as Verified, Partial, Missing, Not applicable, or Not verifiable, with evidence and priority for each gap.
+4. Recommend concrete fixes with an owner and a verification method. Separate Product Design, Frontend, Backend, and Shared work.
+5. When required backend behavior is absent, undocumented, inaccessible, or requires a server-side decision, add an item to the §3.11 Backend Guidance Register. Do not invent a response shape to close the finding.
+6. When adding an endpoint dependency, update the feature Integration Map and the API contract in the same PR.
+7. When adding a role/permission gate, update the feature Auth & Permissions Matrix and create the corresponding state coverage.
+8. Create MSW fixture coverage for populated, empty, loading, error, unauthenticated, and all applicable forbidden/not-found/offline states. Retain mocks after live integration.
+9. If omitting a §3 deliverable, add `N/A — <reason>` to the report, PR, or feature README.
+10. Update this file and its changelog only when changing cross-feature audit policy, locations, or required deliverables; keep ordinary feature specifics in the feature README.
 
 ---
 
-## 7. Changelog
+## 8. Changelog
 
 | Date | Change |
 |---|---|
+| 2026-07-18 | Reframed the playbook as an evidence-based repository audit, added finding priorities and ownership, and added the Backend Guidance Register for gaps Product Design cannot resolve alone. |
 | 2026-07-18 | Clarified canonical artifact locations; strengthened contract, state, auth, accessibility, observability, and acceptance requirements; retained MSW coverage after live integration. |
 | 2026-07-17 | Initial version created |

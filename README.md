@@ -1,12 +1,14 @@
-# Frontend Integration Playbook
+# Frontend-to-Backend Health Audit Playbook
 
-A reusable policy for frontend-to-backend handoff. It defines the contracts, state coverage, permissions, analytics, accessibility, observability, and acceptance criteria that make integrations predictable.
+A reusable, evidence-based guide for auditing frontend-to-backend health. It helps product designers and engineering teams find integration risks, recommend fixes, and raise backend-owned gaps with enough context to resolve them.
 
 ## Use it
 
-1. Read [FRONTEND.md](FRONTEND.md) before starting backend-dependent frontend work.
-2. Copy the feature documentation and checklist conventions into the consuming project.
-3. Keep feature-specific details in that project; update this repository when the cross-feature policy itself improves.
+1. Place [FRONTEND.md](FRONTEND.md) in the repository you want to audit.
+2. Follow its audit workflow to trace real user flows and assess each integration domain from available evidence.
+3. Report findings with priority, owner, evidence, impact, recommendation, and verification method.
+4. Use the Backend Guidance Register for missing capabilities or decisions that Product Design and Frontend cannot resolve alone.
+5. Keep project-specific audit reports in the audited project; update this repository when the cross-project audit policy improves.
 
 ## Add it to another project
 
@@ -20,7 +22,7 @@ For a stable dependency, replace `main` in the URL with a release tag or commit 
 
 ## Repository contents
 
-- `FRONTEND.md` — the canonical playbook
+- `FRONTEND.md` — the canonical audit playbook and Backend Guidance Register
 - `.github/PULL_REQUEST_TEMPLATE.md` — a ready-to-use integration review template
 
 ## Publishing to GitHub
