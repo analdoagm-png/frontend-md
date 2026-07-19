@@ -226,43 +226,70 @@ Phrase each item as a request that can be answered: **what is missing, why it ma
 
 ## 4. Product Design Response Plan
 
-Work through audit findings in priority order. Do not start lower-priority polish while a higher-priority finding leaves users unsafe, blocks delivery, or makes product behavior unknown.
+Work through findings in priority order. Do not start lower-priority polish while a higher-priority finding leaves users unsafe, blocks delivery, or makes product behavior unknown. An agent can accelerate research and frontend implementation, but it cannot approve product decisions or invent backend behavior.
+
+### Start every finding
+
+- [ ] **Create a single finding brief:** include priority, affected flow, evidence, user/delivery impact, and desired outcome.
+  - *Agentic suggestion:* Ask an agent to trace the exact flow in the repository and return file paths, relevant code, existing tests/stories, and unknowns before it changes anything.
+- [ ] **Name the owner:** Product Design for experience and decision framing; Frontend for client implementation; Backend for server behavior/semantics; Shared for contract changes.
+  - *Agentic suggestion:* Have the agent separate the work into “can implement from repository evidence” and “requires a backend/product decision.”
+- [ ] **Choose verification before implementation:** specify the real evidence that will close the finding—type check, test, Storybook state, staging scenario, approved API sample, or accessibility check.
+  - *Agentic suggestion:* Instruct the agent to run the smallest relevant checks after each change and report both passing checks and blockers.
 
 ### P0 — Contain user harm and block unsafe release
 
-1. Confirm the evidence, affected flow, users, environments, and severity with Frontend and Backend.
-2. Stop or constrain the unsafe path: remove a harmful action, gate a feature, provide a safe fallback, or pause release. Do not design around a security, privacy, data-loss, or authorization failure as if it were cosmetic.
-3. Open a Shared incident/task with a named decision-maker and a verification condition.
-4. Add any server-side dependency to the Backend Guidance Register, then update UI states, copy, and test/Storybook coverage once the decision is made.
-5. Close only after the real integration is verified—not merely a mock or design prototype.
+- [ ] **Confirm scope immediately:** identify affected users, environments, data, and the unsafe behavior with Frontend and Backend.
+  - *Agentic suggestion:* Ask the agent for a read-only impact trace: where the action starts, every request it makes, and which UI states currently hide or expose risk.
+- [ ] **Apply a safe containment:** remove or disable the harmful action, gate the feature, add a safe fallback, or pause release.
+  - *Agentic suggestion:* Authorize the agent to implement only reversible client-side containment; do not let it bypass authorization, mask data loss, or fabricate successful responses.
+- [ ] **Open a Shared incident/task:** name the decision-maker, immediate containment, backend dependency, and exact condition for reopening the path.
+  - *Agentic suggestion:* Have the agent draft the incident from the finding evidence, then review and own the final product decision.
+- [ ] **Add server-side unknowns to the Backend Guidance Register.**
+  - *Agentic suggestion:* Ask the agent to propose a precise backend request—endpoint, status/error semantics, or enforcement rule—not a vague “backend issue.”
+- [ ] **Verify the real integration before closure.**
+  - *Agentic suggestion:* Require real-environment evidence in addition to mocks, then have the agent update stories/tests/docs to preserve the regression coverage.
 
 ### P1 — Resolve product and contract ambiguity
 
-1. Reproduce or trace the flow and write the exact user-facing failure: trigger, expected result, actual/unknown result, and impact.
-2. Specify the intended product behavior: success, loading, empty, denied, validation, error, offline, and recovery states as applicable.
-3. Identify the owner. Product Design owns experience and decision framing; Frontend owns client implementation; Backend owns server behavior and semantics; use Shared when the contract requires both.
-4. Update feature documentation, interaction states, acceptance criteria, and fixtures. Add unresolved server behavior to the Backend Guidance Register with the required decision or artifact.
-5. Agree on a verification method—contract test, staging scenario, API response sample, Storybook state, or accessibility check—and retest before closing.
+- [ ] **Describe the user-facing failure:** document trigger, expected result, actual or unknown result, and impact.
+  - *Agentic suggestion:* Have the agent turn repository evidence into a concise reproduction path and flag assumptions separately from facts.
+- [ ] **Define the intended product states:** specify success, loading, empty, denied, validation, error, offline, and recovery states that apply.
+  - *Agentic suggestion:* Ask the agent to inventory existing Storybook/MSW states and generate only the missing state checklist; review the proposed UX before implementation.
+- [ ] **Make the contract decision explicit:** record request/response fields, status codes, permissions, retries, and any fallback behavior.
+  - *Agentic suggestion:* Let the agent update types, fixtures, and feature docs only after a contract exists or the assumption is recorded in the Backend Guidance Register.
+- [ ] **Implement and document the approved behavior.**
+  - *Agentic suggestion:* Delegate the frontend slice—component states, API-client handling, stories, and tests—in one bounded task with acceptance criteria.
+- [ ] **Verify the intended behavior.**
+  - *Agentic suggestion:* Have the agent run the agreed checks and summarize what was verified versus still unverified; close only when the agreed real/API evidence is available.
 
 ### P2 — Strengthen reliability, accessibility, and maintainability
 
-1. Group related findings into a small improvement slice rather than scattering isolated cleanup tasks.
-2. Prioritize improvements that prevent recurring support work: typed/validated contracts, realistic fixtures, accessible async feedback, correlation IDs, and clear ownership.
-3. Add the missing documentation or test coverage, and ensure the change has an owner and definition of done.
-4. Schedule it in the next appropriate iteration; escalate to P1 if evidence shows active user or release impact.
+- [ ] **Group related weaknesses into one improvement slice.**
+  - *Agentic suggestion:* Ask the agent to cluster duplicate contract, fixture, accessibility, and observability findings by root cause and propose the smallest high-leverage change.
+- [ ] **Prioritize recurring-cost reducers:** typed/validated contracts, realistic fixtures, accessible async feedback, correlation IDs, and clear ownership.
+  - *Agentic suggestion:* Have the agent estimate which change removes the most repeated manual work or support ambiguity, while leaving priority decisions to the designer.
+- [ ] **Add durable coverage and documentation.**
+  - *Agentic suggestion:* Delegate implementation of tests, Storybook states, contract checks, and feature README updates; require the agent to keep mocks aligned with the contract.
+- [ ] **Schedule and reassess.**
+  - *Agentic suggestion:* Ask the agent to surface signals that should promote the finding to P1, such as a staging failure, accessibility blocker, or repeated support incident.
 
 ### P3 — Capture low-risk refinements
 
-1. Record the improvement with evidence and the smallest useful recommendation.
-2. Bundle it with nearby feature work, documentation maintenance, or a planned audit cycle.
-3. Do not let P3 items obscure unresolved P0–P2 findings in the audit summary.
+- [ ] **Record the smallest useful improvement and evidence.**
+  - *Agentic suggestion:* Have the agent draft a concise backlog item with scope, owner, and a verification note; remove speculative implementation detail.
+- [ ] **Bundle it with adjacent work or an audit cycle.**
+  - *Agentic suggestion:* Ask the agent to find the feature or documentation touchpoint where the change can be made with minimal context switching.
+- [ ] **Keep priority visible.**
+  - *Agentic suggestion:* Have the agent maintain a sorted report so P3 work never obscures unresolved P0–P2 findings.
 
 ### Product Designer closure checklist
 
 - [ ] The finding has evidence, priority, owner, and user/delivery impact.
-- [ ] The intended UI behavior and acceptance criteria are documented.
+- [ ] The intended UI behavior and acceptance criteria are documented and approved by the appropriate owner.
 - [ ] Backend-owned unknowns appear in the Backend Guidance Register rather than in an invented design assumption.
-- [ ] The chosen implementation/decision is reflected in contracts, states, and fixtures where applicable.
+- [ ] The chosen implementation/decision is reflected in contracts, states, fixtures, and analytics where applicable.
+- [ ] The agent’s changes were reviewed for scope, and all relevant checks were run.
 - [ ] The finding was verified in the agreed environment and its audit status was updated.
 
 ---
@@ -332,7 +359,7 @@ This is not documentation hygiene alone. These artifacts extend design work into
 
 | Date | Change |
 |---|---|
-| 2026-07-18 | Added a priority-ordered Product Design Response Plan for turning audit findings into containment, resolution, improvement, and verification work. |
+| 2026-07-18 | Added a priority-ordered, agentic Product Design Response Plan with checklists for containment, resolution, improvement, and verification work. |
 | 2026-07-18 | Reframed the playbook as an evidence-based repository audit, added finding priorities and ownership, and added the Backend Guidance Register for gaps Product Design cannot resolve alone. |
 | 2026-07-18 | Clarified canonical artifact locations; strengthened contract, state, auth, accessibility, observability, and acceptance requirements; retained MSW coverage after live integration. |
 | 2026-07-17 | Initial version created |
