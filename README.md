@@ -8,7 +8,8 @@ A reusable, evidence-based guide for auditing frontend-to-backend health. It hel
 2. Follow its audit workflow to trace real user flows and assess each integration domain from available evidence.
 3. Report findings with priority, owner, evidence, impact, recommendation, and verification method.
 4. Use the Backend Guidance Register for missing capabilities or decisions that Product Design and Frontend cannot resolve alone.
-5. Keep project-specific audit reports in the audited project; update this repository when the cross-project audit policy improves.
+5. Use the Product Design Response Plan to address P0–P3 findings in order and verify closure.
+6. Keep project-specific audit reports in the audited project; update this repository when the cross-project audit policy improves.
 
 ## Add it to another project
 

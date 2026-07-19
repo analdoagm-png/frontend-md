@@ -3,7 +3,7 @@
 **Owner:** Analdo — Senior Product Designer (agentic/AI-backed workflow)  
 **Purpose:** Audit the health of a repository’s frontend-to-backend integration. Any AI agent should be able to inspect the available evidence, identify risks and missing capabilities, recommend practical improvements, and give backend teams an actionable list of gaps the product designer cannot resolve alone.
 
-If you are an agent working in this repo, read **§7, Instructions for Agents**, before starting.
+If you are an agent working in this repo, read **§8, Instructions for Agents**, before starting.
 
 ---
 
@@ -224,7 +224,50 @@ Phrase each item as a request that can be answered: **what is missing, why it ma
 
 ---
 
-## 4. Recommended Repo Structure
+## 4. Product Design Response Plan
+
+Work through audit findings in priority order. Do not start lower-priority polish while a higher-priority finding leaves users unsafe, blocks delivery, or makes product behavior unknown.
+
+### P0 — Contain user harm and block unsafe release
+
+1. Confirm the evidence, affected flow, users, environments, and severity with Frontend and Backend.
+2. Stop or constrain the unsafe path: remove a harmful action, gate a feature, provide a safe fallback, or pause release. Do not design around a security, privacy, data-loss, or authorization failure as if it were cosmetic.
+3. Open a Shared incident/task with a named decision-maker and a verification condition.
+4. Add any server-side dependency to the Backend Guidance Register, then update UI states, copy, and test/Storybook coverage once the decision is made.
+5. Close only after the real integration is verified—not merely a mock or design prototype.
+
+### P1 — Resolve product and contract ambiguity
+
+1. Reproduce or trace the flow and write the exact user-facing failure: trigger, expected result, actual/unknown result, and impact.
+2. Specify the intended product behavior: success, loading, empty, denied, validation, error, offline, and recovery states as applicable.
+3. Identify the owner. Product Design owns experience and decision framing; Frontend owns client implementation; Backend owns server behavior and semantics; use Shared when the contract requires both.
+4. Update feature documentation, interaction states, acceptance criteria, and fixtures. Add unresolved server behavior to the Backend Guidance Register with the required decision or artifact.
+5. Agree on a verification method—contract test, staging scenario, API response sample, Storybook state, or accessibility check—and retest before closing.
+
+### P2 — Strengthen reliability, accessibility, and maintainability
+
+1. Group related findings into a small improvement slice rather than scattering isolated cleanup tasks.
+2. Prioritize improvements that prevent recurring support work: typed/validated contracts, realistic fixtures, accessible async feedback, correlation IDs, and clear ownership.
+3. Add the missing documentation or test coverage, and ensure the change has an owner and definition of done.
+4. Schedule it in the next appropriate iteration; escalate to P1 if evidence shows active user or release impact.
+
+### P3 — Capture low-risk refinements
+
+1. Record the improvement with evidence and the smallest useful recommendation.
+2. Bundle it with nearby feature work, documentation maintenance, or a planned audit cycle.
+3. Do not let P3 items obscure unresolved P0–P2 findings in the audit summary.
+
+### Product Designer closure checklist
+
+- [ ] The finding has evidence, priority, owner, and user/delivery impact.
+- [ ] The intended UI behavior and acceptance criteria are documented.
+- [ ] Backend-owned unknowns appear in the Backend Guidance Register rather than in an invented design assumption.
+- [ ] The chosen implementation/decision is reflected in contracts, states, and fixtures where applicable.
+- [ ] The finding was verified in the agreed environment and its audit status was updated.
+
+---
+
+## 5. Recommended Repo Structure
 
 ```text
 contracts/
@@ -253,13 +296,13 @@ Feature-owned mocks, fixtures, stories, models, and documentation should evolve 
 
 ---
 
-## 5. Why This Matters for a Senior Product Design Role
+## 6. Why This Matters for a Senior Product Design Role
 
 This is not documentation hygiene alone. These artifacts extend design work into frontend architecture, API semantics, accessibility, observability, and cross-functional delivery. A design system built this way documents **product states**—loading, empty, permission-denied, offline, and error—not merely visual components.
 
 ---
 
-## 6. Operating Rules
+## 7. Operating Rules
 
 - The API contract is authoritative for transport shapes; feature documentation is authoritative for UI behavior and product decisions.
 - A change to an endpoint, role gate, or analytics event updates its contract and feature documentation in the same PR.
@@ -270,7 +313,7 @@ This is not documentation hygiene alone. These artifacts extend design work into
 
 ---
 
-## 7. Instructions for Agents
+## 8. Instructions for Agents
 
 1. Start with §2. Inventory the repository and state the audit scope and missing evidence before making conclusions.
 2. Trace each material user flow from UI to its backend dependency; do not assume Storybook stories alone represent runtime behavior.
@@ -285,10 +328,11 @@ This is not documentation hygiene alone. These artifacts extend design work into
 
 ---
 
-## 8. Changelog
+## 9. Changelog
 
 | Date | Change |
 |---|---|
+| 2026-07-18 | Added a priority-ordered Product Design Response Plan for turning audit findings into containment, resolution, improvement, and verification work. |
 | 2026-07-18 | Reframed the playbook as an evidence-based repository audit, added finding priorities and ownership, and added the Backend Guidance Register for gaps Product Design cannot resolve alone. |
 | 2026-07-18 | Clarified canonical artifact locations; strengthened contract, state, auth, accessibility, observability, and acceptance requirements; retained MSW coverage after live integration. |
 | 2026-07-17 | Initial version created |
